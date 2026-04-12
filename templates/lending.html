@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lending / Khata - Rachna Agri Spray Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-body">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='RACHNA AGRI SUPPLIES LOGO.jpg') }}" alt="Logo" style="width: 45px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+            <h2>Rachna Agri</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">Dashboard</a>
+            <a href="/inventory" class="nav-item">Inventory</a>
+            <a href="/customers" class="nav-item">Customers</a>
+            <a href="/lending" class="nav-item active">Lending/Khata</a>
+            <a href="/reports" class="nav-item">Reports</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <div class="greeting">
+                <h1>Outstanding Lendings</h1>
+                <p>Track farmers and customers showing current debt</p>
+            </div>
+            <div class="user-profile">
+                <div class="avatar">{{ username[0] | upper if username else 'A' }}</div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="glass-panel" style="grid-column: span 3; padding: 32px;">
+                <h2 style="margin-bottom: 20px;">Lending Khata Database</h2>
+                <input type="text" class="quick-search" placeholder="Search by name or phone..." style="margin-bottom: 16px; width: 100%; max-width: 300px; padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--input-bg); color: white; outline: none;">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Address</th>
+                                <th>Total Debt</th>
+                                <th>Ledger Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in customers %}
+                            <tr>
+                                <td><strong>{{ c.name }}</strong></td>
+                                <td>{{ c.phone or '-' }}</td>
+                                <td>{{ c.address or '-' }}</td>
+                                <td class="text-warning">Rs. {{ "%.2f"|format(c.total_balance) }}</td>
+                                <td>
+                                    <a href="{{ url_for('customer_profile', id=c.id) }}" class="action-btn">View full Khata</a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">No outstanding lending records. Excellent!</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.querySelectorAll('.quick-search').forEach(input => {
+            input.addEventListener('keyup', function() {
+                let filter = this.value.toLowerCase();
+                let rows = this.parentElement.querySelectorAll('.data-table tbody tr');
+                
+                rows.forEach(row => {
+                    let text = row.innerText.toLowerCase();
+                    if(text.includes(filter)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

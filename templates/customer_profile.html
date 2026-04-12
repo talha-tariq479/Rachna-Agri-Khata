@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ customer.name }} - Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-body">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='RACHNA AGRI SUPPLIES LOGO.jpg') }}" alt="Logo" style="width: 45px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+            <h2>Rachna Agri</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">Dashboard</a>
+            <a href="/inventory" class="nav-item">Inventory</a>
+            <a href="/customers" class="nav-item active">Customers</a>
+            <a href="/lending" class="nav-item">Lending/Khata</a>
+            <a href="/reports" class="nav-item">Reports</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div style="margin-bottom: 24px;">
+            <a href="{{ url_for('customers') }}" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">&larr; Back to Customers</a>
+        </div>
+        
+        <header class="page-header" style="align-items: flex-start; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                <div class="greeting">
+                    <h1>{{ customer.name }}</h1>
+                    <p>{{ customer.phone or 'No phone' }} | {{ customer.address or 'No address' }}</p>
+                </div>
+                
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <a href="{{ url_for('print_khata', id=customer.id) }}" target="_blank" class="action-btn" style="background-color: var(--glass-bg); color: white; border: 1px solid var(--glass-border);">🖨️ Print Khata</a>
+                    <div class="status-badge {% if status == 'Overdue' %}badge-danger{% else %}badge-success{% endif %}">
+                        {{ status }}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                <p class="flash-msg" style="border: 1px solid rgba(47, 143, 76, 0.4); background: rgba(47, 143, 76, 0.2); color: #86efac;">
+                    {{ message }}
+                </p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="dashboard-grid">
+            <div class="stat-card" style="flex-direction: column; align-items: flex-start; gap: 12px; position: relative;">
+                <h3 style="color: var(--text-muted); font-size: 16px; margin:0;">Total Outstanding Balance</h3>
+                <p class="stat-value" style="font-size: 36px; padding: 10px 0; {% if customer.total_balance > 0 %}color: #fca5a5;{% endif %}">
+                    Rs. {{ "%.2f"|format(customer.total_balance) }}
+                </p>
+                <button id="openModalBtn" class="submit-btn" style="padding: 12px; margin-top: auto;">+ Add Transaction</button>
+            </div>
+            
+            <div class="glass-panel" style="grid-column: span 2; padding: 32px;">
+                <h2 style="margin-bottom: 20px; font-size: 22px;">Transaction Ledger</h2>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Type</th>
+                                <th>Payment Method / Details</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in transactions %}
+                            <tr>
+                                <td style="color: var(--text-muted); font-size: 14px;">{{ tx.date[:16].replace('T', ' ') }}</td>
+                                <td>
+                                    <span class="tx-badge {% if tx.type == 'Payment' %}tx-payment{% else %}tx-credit{% endif %}">
+                                        {{ tx.type }}
+                                    </span>
+                                </td>
+                                <td>{{ tx.payment_method or '-' }}</td>
+                                <td style="font-weight: 600;">Rs. {{ "%.2f"|format(tx.amount) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 30px; color: var(--text-muted);">No records found in this Khata.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Generic Modal Background -->
+    <div id="txModal" class="modal-overlay">
+        <div class="modal-content glass-panel" style="padding: 30px 40px !important;">
+            <div class="modal-header">
+                <h2>New Transaction</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form action="{{ url_for('add_transaction', id=customer.id) }}" method="POST" class="login-form">
+                <div class="input-group">
+                    <label for="type">Transaction Type</label>
+                    <div style="position: relative;">
+                        <!-- Wrapped in div to style the arrow nicely maybe -->
+                        <select name="type" id="type" class="custom-select" required>
+                            <option value="Sale/Credit">Sale / Give Credit (Increases Debt)</option>
+                            <option value="Payment">Payment Received (Decreases Debt)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="amount">Amount (Rs.)</label>
+                    <input type="number" step="0.01" min="0" id="amount" name="amount" required placeholder="0.00" style="padding: 14px;">
+                </div>
+                <div class="input-group">
+                    <label for="payment_method">Note / Reference</label>
+                    <input type="text" id="payment_method" name="payment_method" placeholder="Cash, Easypaisa, or Item description..." style="padding: 14px;">
+                </div>
+                <button type="submit" class="submit-btn" style="margin-top: 16px;">Save Ledger Entry</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById("txModal");
+        const btn = document.getElementById("openModalBtn");
+        const span = document.getElementsByClassName("close-modal")[0];
+
+        btn.onclick = function() {
+            modal.style.display = "flex";
+        }
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

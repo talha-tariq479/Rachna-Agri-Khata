@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Rachna Agri Spray Center</title>
+    <meta name="description" content="Secure login portal for Rachna Agri Spray Center Khata and Inventory Management System.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="glass-panel">
+            <div class="logo-wrapper" style="text-align: center; margin-bottom: 20px;">
+                <img src="{{ url_for('static', filename='RACHNA AGRI SUPPLIES LOGO.jpg') }}" alt="Rachna Agri Logo" style="width: 180px; border-radius: 50%; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            </div>
+            
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="flash-messages">
+                  {% for message in messages %}
+                    <p class="flash-msg">{{ message }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+            
+            <form action="{{ url_for('login') }}" method="POST" class="login-form" id="loginForm">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn" id="loginBtn">Secure Login</button>
+                </div>
+            </form>
+            
+            <div class="footer-text">
+                <p>Authorized personnel only.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

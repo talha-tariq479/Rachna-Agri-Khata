@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Rachna Agri Spray Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="glass-panel">
+            <div class="logo-wrapper">
+                <div class="logo-icon">🌿</div>
+                <h1>Register Admin</h1>
+                <p class="subtitle">Create Initial System Account</p>
+            </div>
+            
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="flash-messages">
+                  {% for message in messages %}
+                    <p class="flash-msg">{{ message }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+            
+            <form action="{{ url_for('register') }}" method="POST" class="login-form">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required autocomplete="username">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a password" required autocomplete="new-password">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn" id="registerBtn">Create Account</button>
+                </div>
+                <div class="footer-text mt-3">
+                    <a href="{{ url_for('login') }}" style="color: var(--primary-color); text-decoration: none;">Back to Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

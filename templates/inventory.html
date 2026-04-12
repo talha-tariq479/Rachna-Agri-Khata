@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory - Rachna Agri Spray Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-body">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='RACHNA AGRI SUPPLIES LOGO.jpg') }}" alt="Logo" style="width: 45px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+            <h2>Rachna Agri</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">Dashboard</a>
+            <a href="/inventory" class="nav-item active">Inventory</a>
+            <a href="/customers" class="nav-item">Customers</a>
+            <a href="/lending" class="nav-item">Lending/Khata</a>
+            <a href="/reports" class="nav-item">Reports</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <div class="greeting">
+                <h1>Warehouse Inventory</h1>
+                <p>Manage products, stock levels, and quick sales</p>
+            </div>
+            <div class="user-profile">
+                <div class="avatar">{{ username[0] | upper if username else 'A' }}</div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                <p class="flash-msg" style="border: 1px solid rgba(47, 143, 76, 0.4); background: rgba(47, 143, 76, 0.2); color: #86efac;">
+                    {{ message }}
+                </p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="dashboard-grid">
+            <div class="glass-panel" style="padding: 32px;">
+                <h2 style="margin-bottom: 20px;">Add New Product</h2>
+                <form action="{{ url_for('inventory') }}" method="POST" class="login-form">
+                    <div class="input-group">
+                        <label for="product_name">Product Name</label>
+                        <input type="text" id="product_name" name="product_name" required placeholder="e.g. Lambda 1L">
+                    </div>
+                    <div class="input-group" style="display:flex; flex-direction:row; gap:12px;">
+                        <div style="flex:1;">
+                            <label for="purchase_price">Purchase (Rs.)</label>
+                            <input type="number" step="0.01" min="0" id="purchase_price" name="purchase_price" required placeholder="800">
+                        </div>
+                        <div style="flex:1;">
+                            <label for="sale_price">Sale (Rs.)</label>
+                            <input type="number" step="0.01" min="0" id="sale_price" name="sale_price" required placeholder="1200">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="stock_count">Initial Stock</label>
+                        <input type="number" min="0" id="stock_count" name="stock_count" required placeholder="50">
+                    </div>
+                    <button type="submit" class="submit-btn" style="margin-top: 16px;">Add Product</button>
+                </form>
+            </div>
+
+            <div class="glass-panel" style="grid-column: span 2; padding: 32px;">
+                <h2 style="margin-bottom: 20px;">Current Stock</h2>
+                <input type="text" class="quick-search" placeholder="Search product..." style="margin-bottom: 16px; width: 100%; max-width: 300px; padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--input-bg); color: white; outline: none;">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Purchase</th>
+                                <th>Sale Price</th>
+                                <th>Availability</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in inventory %}
+                            <tr>
+                                <td><strong>{{ item.product_name }}</strong></td>
+                                <td>Rs. {{ "%.2f"|format(item.purchase_price) }}</td>
+                                <td class="sale-price-highlight">Rs. {{ "%.2f"|format(item.sale_price) }}</td>
+                                <td>
+                                    <span class="tx-badge {% if item.stock_count <= 0 %}badge-danger{% elif item.stock_count <= 10 %}tx-credit{% else %}tx-payment{% endif %}">
+                                        {{ item.stock_count }} {{ 'unit' if item.stock_count == 1 else 'units' }}
+                                    </span>
+                                </td>
+                                <td style="display: flex; gap: 8px; align-items: center;">
+                                    <button class="action-btn open-quick-sale" 
+                                            data-id="{{ item.id }}" 
+                                            data-name="{{ item.product_name }}"
+                                            style="cursor: pointer; display: inline-flex; align-items: center;">
+                                        ⚡ Quick Sale
+                                    </button>
+                                    <form action="{{ url_for('delete_inventory', id=item.id) }}" method="POST" onsubmit="return confirm('Are you absolutely sure you want to permanently delete this Product?');">
+                                        <button type="submit" class="action-btn" style="color: #fca5a5; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); cursor: pointer; display: inline-flex; height: 100%;">🗑️ Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">No products found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Quick Sale Modal -->
+    <div id="quickSaleModal" class="modal-overlay">
+        <div class="modal-content glass-panel" style="padding: 30px 40px !important;">
+            <div class="modal-header">
+                <h2>⚡ Quick Sale: <span id="modalProductName" style="color:var(--primary-color);"></span></h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <p style="color:var(--text-muted); margin-bottom: 20px;">Select a customer to bill this item. This will subtract 1 unit from stock and add the sale price to their Khata.</p>
+            <form id="quickSaleForm" action="" method="POST" class="login-form">
+                <div class="input-group">
+                    <label for="customer_id">Select Farmer/Customer</label>
+                    <div style="position: relative;">
+                        <select name="customer_id" id="customer_id" class="custom-select" required>
+                            <option value="">-- Choose Customer --</option>
+                            {% for c in customers %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn" style="margin-top: 16px;">Confirm Transaction</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const qsModal = document.getElementById("quickSaleModal");
+        const closeSpan = document.getElementsByClassName("close-modal")[0];
+        const qsForm = document.getElementById("quickSaleForm");
+        const qsTitle = document.getElementById("modalProductName");
+
+        document.querySelectorAll('.open-quick-sale').forEach(button => {
+            button.onclick = function() {
+                const productId = this.getAttribute('data-id');
+                const productName = this.getAttribute('data-name');
+                
+                qsTitle.textContent = productName;
+                // Set form action dynamically
+                qsForm.action = `/inventory/${productId}/quick_sale`;
+                
+                qsModal.style.display = "flex";
+            }
+        });
+
+        closeSpan.onclick = function() {
+            qsModal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == qsModal) {
+                qsModal.style.display = "none";
+            }
+        }
+        
+        document.querySelectorAll('.quick-search').forEach(input => {
+            input.addEventListener('keyup', function() {
+                let filter = this.value.toLowerCase();
+                let rows = this.parentElement.querySelectorAll('.data-table tbody tr');
+                
+                rows.forEach(row => {
+                    let text = row.innerText.toLowerCase();
+                    if(text.includes(filter)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

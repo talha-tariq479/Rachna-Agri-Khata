@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Rachna Agri Spray Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-body">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='RACHNA AGRI SUPPLIES LOGO.jpg') }}" alt="Logo" style="width: 45px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+            <h2>Rachna Agri</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item active">Dashboard</a>
+            <a href="/inventory" class="nav-item">Inventory</a>
+            <a href="/customers" class="nav-item">Customers</a>
+            <a href="/lending" class="nav-item">Lending/Khata</a>
+            <a href="/reports" class="nav-item">Reports</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <div class="greeting">
+                <h1>Assalam-o-Alaikum, Arshad Saleem</h1>
+                <p>Overview of shop analytics</p>
+            </div>
+            <div class="user-profile">
+                <!-- Fallback to 'A' if username somehow misses -->
+                <div class="avatar">{{ username[0] | upper if username else 'A' }}</div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Card 1 -->
+            <div class="stat-card">
+                <div class="card-icon">📦</div>
+                <div class="card-info">
+                    <h3>Total Stock Value</h3>
+                    <p class="stat-value">Rs. {{ "%.2f"|format(total_stock_value) }}</p>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="stat-card">
+                <div class="card-icon">🤝</div>
+                <div class="card-info">
+                    <h3>Total Receivables</h3>
+                    <p class="stat-value">Rs. {{ "%.2f"|format(total_receivables) }}</p>
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="stat-card">
+                <div class="card-icon">📈</div>
+                <div class="card-info">
+                    <h3>Daily Sales</h3>
+                    <p class="stat-value">Rs. {{ "%.2f"|format(daily_sales) }}</p>
+                </div>
+            </div>
+            <!-- Card 4 -->
+            <a href="/inventory?filter=low" style="text-decoration: none; color: inherit;">
+            <div class="stat-card">
+                <div class="card-icon">⚠️</div>
+                <div class="card-info">
+                    <h3>Low Stock Alerts</h3>
+                    <p class="stat-value">{{ low_stock_alerts }} items</p>
+                </div>
+            </div>
+            </a>
+        </div>
+        
+        <div class="recent-sections">
+            <div class="glass-panel wide-panel">
+                <h2>Recent Transactions</h2>
+                <div class="placeholder-text">Transaction list will appear here...</div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

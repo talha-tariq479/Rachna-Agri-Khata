@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Rachna Agri Spray Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-body">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='RACHNA AGRI SUPPLIES LOGO.jpg') }}" alt="Logo" style="width: 45px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+            <h2>Rachna Agri</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">Dashboard</a>
+            <a href="/inventory" class="nav-item">Inventory</a>
+            <a href="/customers" class="nav-item">Customers</a>
+            <a href="/lending" class="nav-item">Lending/Khata</a>
+            <a href="/reports" class="nav-item active">Reports</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <div class="greeting">
+                <h1>Financial Reports</h1>
+                <p>Summary analytics for the business</p>
+            </div>
+            <div class="user-profile">
+                <div class="avatar">{{ username[0] | upper if username else 'A' }}</div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Metric 1 -->
+            <div class="stat-card" style="padding: 32px; flex-direction:column; align-items:flex-start; justify-content:center;">
+                <div class="card-icon" style="margin-bottom: 16px;">📈</div>
+                <div class="card-info">
+                    <h3 style="font-size: 18px;">Today's Total Sales</h3>
+                    <p class="stat-value sales-highlight" style="font-size: 32px; margin-top: 8px;">Rs. {{ "%.2f"|format(today_sales) }}</p>
+                </div>
+                <p style="color:var(--text-muted); font-size:13px; margin-top:20px;">Sum of all transactions tagged as Sale/Credit matching today's date context.</p>
+            </div>
+
+            <!-- Metric 2 -->
+            <div class="stat-card" style="padding: 32px; flex-direction:column; align-items:flex-start; justify-content:center;">
+                <div class="card-icon" style="margin-bottom: 16px;">💡</div>
+                <div class="card-info">
+                    <h3 style="font-size: 18px;">Today's Estimated Profit</h3>
+                    <p class="stat-value profit-highlight" style="font-size: 32px; margin-top: 8px;">Rs. {{ "%.2f"|format(today_profit) }}</p>
+                </div>
+                <p style="color:var(--text-muted); font-size:13px; margin-top:20px;">Gross Profit modeled exactly against the margin difference of explicit Quick Sales.</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a href="/backup" class="submit-btn" style="display: inline-block; width: auto; padding: 16px 32px; text-decoration: none; font-size: 18px;">💾 Download Database Backup</a>
+        </div>
+    </main>
+</body>
+</html>
